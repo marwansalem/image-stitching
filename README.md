@@ -24,16 +24,16 @@ This project requires the following python libraries:
 ## Guide
 Upon running the project user asked to input the first image,  
 then the second image.
-![Load first image](tutorial/0.jpg)
+![Load first image](tutorial/0.JPG)
 
 Then user is asked either to mark the correspondence points on the image,
 or to load it from a text file.  
-![points prompt](tutorial/1.jpg)  
+![points prompt](tutorial/1.JPG)  
 If the user choose to mark the points, the two images are opened in two windows,  
 and the user can mark the corresponding points on the the two images using mouse clicks.  
 After choosing the points press any keyboard key to continue.
 ### **4 points at least  must be chosen.**
-![Mark points](tutorial/3.jpg)  
+![Mark points](tutorial/3.JPG)  
 However, adding more points will generally make the result better.
 
 If the user chooses not to mark the points, they can load them from a text file, which has the following format.  
@@ -49,13 +49,13 @@ A text file sample.
 
 After the correspondence points are marked or loaded from a file, they are shown on the two images, with the blue color for the first image, and red for the first image.
 Then press enter to continue.
-![Correspondence points](tutorial/4.jpg)  
+![Correspondence points](tutorial/4.JPG)  
 
 ### Finally the stitched image will be shown.
-![Stitched image](tutorial/5.jpg)  
+![Stitched image](tutorial/5.JPG)  
 
 The user is asked whether save the output or not.  
-![Save image prompt points](tutorial/6.jpg)  
+![Save image prompt points](tutorial/6.JPG)  
 
 Then is  asked whether save the correspondence points as  a text file or not.  
-![Save points as text](tutorial/7.jpg)  
+![Save points as text](tutorial/7.JPG)  
