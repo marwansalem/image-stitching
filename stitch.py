@@ -1,7 +1,7 @@
 # importing the module 
 import cv2 
 import numpy as np
-import matplotlib.pyplot as plt
+
 from correspondences import get_image_path, get_correspondences, load_correspondences, write_correspondence_to_file
 import tkinter as tk
 from tkinter import filedialog, messagebox as mb
@@ -63,8 +63,7 @@ def stitch_image(image1_name, image2_name,first_points, second_points, show_corr
         print(dst.shape)
         dst[0:imgB.shape[0], 0:imgB.shape[1]] = imgB
         cv2.imshow('output', dst)
-        plt.show()
-        plt.figure()
+
 
         #new = cv2.resize(dst, (8000, 2800)) 
         #print(new)
