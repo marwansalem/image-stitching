@@ -32,6 +32,22 @@ def compute_H(A):
     # return the vector corresponding to the smallest singular value
     return V[-1].reshape(3,3)
 
+
+def image1_to_image2(H, points1):
+    
+    output_points = []
+    for point in points1:
+        x,y = point
+        p = np.array([x, y, 1]).reshape(3,1)
+        p_dash = np.matmul(H, p)
+        x_dash, y_dash, w = p_dash[:, 0]
+        x_dash = int(x_dash/w)
+        y_dash = int(y_dash/w)
+        output_points.append(np.array([x_dash, y_dash]))
+
+    output_points = np.array(output_points)
+    return output_points
+        
 if __name__=="__main__":
     pass
 
