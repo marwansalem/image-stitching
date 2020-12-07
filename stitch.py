@@ -5,7 +5,7 @@ import numpy as np
 from correspondences import get_image_path, get_correspondences, load_correspondences, write_correspondence_to_file
 import tkinter as tk
 from tkinter import filedialog, messagebox as mb
-from homography import initialize_matrix_A, compute_H
+from homography import initialize_matrix_A, compute_H, image1_to_image2
 # function to display the coordinates of
 # of the points clicked on the image  
 
@@ -31,6 +31,7 @@ def show_points_on_image(img, window_name, points, marker_color=(255,0,0)):
                         0.75, marker_color, 2) 
         i +=1
     cv2.imshow(window_name, copy)
+    return copy
 
 def stitch_image(image1_name, image2_name,first_points, second_points, show_correspondence=True):
     img1 = cv2.imread(image1_name)
@@ -44,61 +45,69 @@ def stitch_image(image1_name, image2_name,first_points, second_points, show_corr
     print(imgA.shape)
     points1, points2 = first_points, second_points
     
+    A = initialize_matrix_A(points1, points2)
+    H = compute_H(A)
+
+
     if show_correspondence:
         #newA = cv2.resize(imgA, (2000, 1400)) 
         #newB = cv2.resize(imgB, (8000, 2800)) 
        
-        show_points_on_image(imgA, 'First Image Points', points1)
-        show_points_on_image(imgB, 'Second Image Points', points2, marker_color=(0, 0, 255))
+        # show_points_on_image(imgA, 'First Image Points', points1)
+        # show_points_on_image(imgB, 'Second Image Points', points2, marker_color=(0, 0, 255))
+        copy = show_points_on_image(imgB,'Mapping',points2,marker_color=(0,0, 255))
+        mapped_points = image1_to_image2(H, points1)
+        show_points_on_image(copy,'Mapping', mapped_points)
         cv2.waitKey(0) 
         cv2.destroyAllWindows() 
 
 
-        #H, masked = cv2.findHomography(points1, points2, cv2.RANSAC, 5.0)
+
         
-        A = initialize_matrix_A(points1, points2)
-        H = compute_H(A)
 
-        dst = cv2.warpPerspective(imgA,H,(imgA.shape[1] + imgB.shape[1] ,  imgA.shape[0] + imgB.shape[0]))
-        print(dst.shape)
-        dst[0:imgB.shape[0], 0:imgB.shape[1]] = imgB
-        cv2.imshow('output', dst)
+    dst = cv2.warpPerspective(imgA,H,(imgA.shape[1] + imgB.shape[1] ,  imgA.shape[0] + imgB.shape[0]))
+    print(dst.shape)
+    dst[0:imgB.shape[0], 0:imgB.shape[1]] = imgB
+    cv2.imshow('output', dst)
 
 
-        #new = cv2.resize(dst, (8000, 2800)) 
-        #print(new)
-        #new = cv2.cvtColor(dst, cv2.COLOR_RGB2BGR)
-        #cv2.imshow('resized', new)
-        cv2.waitKey(0) 
-        cv2.destroyAllWindows() 
-        if len(imgA.shape) != 3:
-            print(dst)
-            print(dst.shape)
-            dst =cv2.cvtColor(dst, cv2.COLOR_BGR2GRAY)
+    cv2.waitKey(0) 
+    cv2.destroyAllWindows() 
+    if len(imgA.shape) != 3:
+            
+        dst =cv2.cvtColor(dst, cv2.COLOR_BGR2GRAY)
 
-        return dst
+    return dst
 
   
 # driver function 
 if __name__=="__main__": 
   
-    # reading the image 
-    DEBUG = False
+    print('====Testing some functions===')
+    DEBUG = True
 
-    # points1, points2 = load_correspondences('points.txt')
+    points1, points2 = load_correspondences('points.txt')
 
-    # print(points1.shape)
+    print(points1.shape)
     
-    # A = initialize_matrix_A(points1, points2)
-    # print(A.shape)
-    # V = compute_H(A)
+    A = initialize_matrix_A(points1, points2)
+    print(A.shape)
+    H = compute_H(A)
 
-    # print(V.shape)
-    # H, masked = cv2.findHomography(points1, points2, cv2.RANSAC, 5.0)
-    # print(H/436.39)
-    # print(np.linalg.norm(H.reshape(9,1)))
-    # print(H.shape)
-    if not DEBUG:
+    img = cv2.imread('image2.jpg')
+    copy = show_points_on_image(img,'Mapping',points2,marker_color=(0,0, 255))
+    mapped_points = image1_to_image2(H, points1)
+    show_points_on_image(copy,'Mapping', mapped_points)
+    print(mapped_points)
+    print(points2)
+
+    cv2.waitKey(0) 
+    cv2.destroyAllWindows()
+
+    ### s
+    print('===Testing Complete===')
+
+    if  DEBUG:
         image1_path = get_image_path("Select first image")
         image2_path = get_image_path("Select second image")
 
