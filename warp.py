@@ -36,6 +36,8 @@ def warp_first_image_points(H_mat, imgA):
 
 def apply_forward_warp(first_image, mapped_points, output_image_shape):
     H, W, C = output_image_shape
+    #print('out_image_shape',output_image_shape)
+    #print('first_image_shape', first_image.shape)
     warped_image = np.zeros(output_image_shape, dtype=np.uint16)
     #mask = np.bool(output_image_shape)
     averaging_weight = np.zeros(output_image_shape, dtype=np.uint16)
@@ -49,6 +51,7 @@ def apply_forward_warp(first_image, mapped_points, output_image_shape):
             for c_src in range(C_src):
                 x, y = x_values[x_src, y_src], y_values[x_src, y_src]
                 if x == int(x) and y == int(y) and (x < W and x >= 0 and x < H and y >= 0):
+                    x, y = int(x), int(y)
                     warped_image[y, x, c_src] += first_image[y_src, x_src, c_src]
                     averaging_weight[y, x, c_src] += 1
                 else:

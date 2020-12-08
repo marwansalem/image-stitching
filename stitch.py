@@ -1,6 +1,7 @@
 # importing the module 
 import cv2 
 import numpy as np
+import sys
 
 from correspondences import get_image_path, get_correspondences, load_correspondences, write_correspondence_to_file
 import tkinter as tk
@@ -9,9 +10,6 @@ from homography import initialize_matrix_A, compute_H, image1_to_image2
 from warp import *
 # function to display the coordinates of
 # of the points clicked on the image  
-
-
-
 
 def save_dialog(title, filetypes):
     root = tk.Tk()
@@ -86,13 +84,9 @@ def stitch_image(image1_name, image2_name,first_points, second_points, show_corr
 
     return dst
 
-  
-# driver function 
-if __name__=="__main__": 
-  
+def test_warp_combine():
+    
     print('====Testing some functions===')
-    DEBUG = True
-
     points1, points2 = load_correspondences('pointsperfect.txt')
 
     imgA = cv2.imread('image1.jpg')
@@ -136,7 +130,16 @@ if __name__=="__main__":
 
     print('===Testing Complete===')
 
-    if  DEBUG and False:
+  
+# driver function 
+if __name__=="__main__": 
+  
+    DEBUG = False
+    
+    if len(sys.argv) > 1:
+        if sys.argv[1] == 'debug':
+            DEBUG == True
+    if not DEBUG :
         image1_path = get_image_path("Select first image")
         image2_path = get_image_path("Select second image")
 
