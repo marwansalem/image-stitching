@@ -90,26 +90,35 @@ def apply_forward_warp(first_image, mapped_points, output_image_shape):
     # apply splatting
 
 
-def inverse_warp(H, warped_image, source_image, mask):
+def inverse_warp(H, warped_image, source_image, mask, x_min, x_max, y_min, y_max):
     '''
     Fill out the holes (black pixels) in the warped image
     '''
     H_inv = np.linalg.pinv(H)
-    W, H, C = warped_image.shape
-    W_src, H_src, C_src = source_image.shape
+    H, W, C = warped_image.shape
+    H_src, W_src, C_src = source_image.shape
 
+    x_min, x_max = int(np.floor(x_min)), int(np.ceil(x_max))
+    y_min, y_max = int(np.floor(y_min)), int(np.ceil(y_max))
+    x_shifted, y_shifted = 0, 0
+    if x_min < 0:
+        x_shifted = x_min
+    if y_min < 0:
+        y_shifted = y_min
     for c in range(C):
-        for x in range(W):
-            for y in range(H):
-                pixel_value = warped_image[x, y, c]
-                if mask[x, y] == 0:
-                    p_dash = np.array([x, y, 1]).reshape(3, 1)
+        for x in range(x_shifted, np.min(x_max + 1, W)):
+            for y in range(y_shifted, np.min(y_max + 1, H)):
+                pixel_value = warped_image[y, x, c]
+                if mask[y, x] == 0:
+                    p_dash = np.array([x - x_min, y - y_min, 1]).reshape(3, 1)
                     p_src = np.matmul(H_inv, p_dash)
                     x_src, y_src, w_src = p_src[:, 0]
                     x_src = x_src/w_src
                     y_src = y_src/w_src
                     if x_src == int(x_src) and y_src == int(y_src) and (x_src < W_src and x_src >= 0 and x_src < H_src and y_src >= 0):
-                        warped_image[x, y, c] = source_image[x_src, y_src, c]
+                        x_src = int(x_src)
+                        y_src = int(y_src)
+                        warped_image[y, x, c] = source_image[y_src, x_src, c]
                     else:
                         # if x_src, y_src are subpixel values or out of range will need to do something
                         # bilinear interpolation for inverse warp
@@ -126,25 +135,29 @@ def inverse_warp(H, warped_image, source_image, mask):
                             if pt[0] >= W_src or pt[0] < 0 or pt[1] >= H_src or pt[1] < 0:
                                 continue
                             ratio = abs(x_src-pt[0]) * abs(y_src-pt[1])
-                            intensity = ratio * source_image[pt[0], pt[1], c]
-                            warped_image[x, y, c] += intensity
+                            intensity = ratio * source_image[pt[1], pt[0], c]
+                            warped_image[y, x, c] += intensity
 
     return warped_image
 
 
-def warp_pipeline(H_matrix, first_image, second_image):
+def warp_pipeline(H_matrix, first_image, second_image, use_inverse_warp=False):
     mapped_points = warp_first_image_points(H_matrix, first_image)
     output_image_shape = (first_image.shape[0]+ second_image.shape[0], first_image.shape[1] + second_image.shape[1], first_image.shape[2])
     x_vals, y_vals = mapped_points
     x_min, y_min = np.min(x_vals), np.min(y_vals)
+    x_max, y_max = np.max(x_vals), np.max(x_vals)
 
     if x_min < 0:
         x_vals += -x_min
     if y_min < 0:
         y_vals += -y_min
+    
 
     mapped_points = (x_vals, y_vals)
 
     warped_image, mask = apply_forward_warp(first_image, mapped_points, output_image_shape)
+    if use_inverse_warp:
+        warped_image = inverse_warp(H_matrix, warped_image, first_image, mask, x_min, x_max, y_min, y_max)
 
     return warped_image, x_min, y_min
