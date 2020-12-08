@@ -64,10 +64,10 @@ def stitch_image(image1_name, image2_name,first_points, second_points, show_corr
     
     #dst = cv2.warpPerspective(imgA,H,(imgA.shape[1] + imgB.shape[1] ,  imgA.shape[0] + imgB.shape[0]))
     start_x = 0
-    if x_min < 0 or True:
+    if x_min < 0:
         start_x = int(-np.floor(x_min))
     start_y = 0
-    if y_min < 0 or True:
+    if y_min < 0:
         start_y = int(-np.floor(y_min))
     dst = warped
     dst[start_y: start_y + imgB.shape[0], start_x:start_x + imgB.shape[1]] = imgB
