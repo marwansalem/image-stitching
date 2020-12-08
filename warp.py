@@ -9,7 +9,7 @@ def warp_first_image_points(H_mat, imgA):
     Computes the warped coordinates for an image, using homography
     matrix H
     '''
-    W, H, C = imgA.shape
+    H, W, C = imgA.shape
 
     #mapped_points = []
     x_values = []
@@ -35,12 +35,12 @@ def warp_first_image_points(H_mat, imgA):
 
 
 def apply_forward_warp(first_image, mapped_points, output_image_shape):
-    W, H, C = output_image_shape
+    H, W, C = output_image_shape
     warped_image = np.zeros(output_image_shape, dtype=np.uint16)
     #mask = np.bool(output_image_shape)
     averaging_weight = np.zeros(output_image_shape, dtype=np.uint16)
 
-    W_src, H_src, C_src = first_image.shape
+    H_src, W_src, C_src = first_image.shape
 
     x_values, y_values = mapped_points
     print('before loop1')
@@ -49,8 +49,8 @@ def apply_forward_warp(first_image, mapped_points, output_image_shape):
             for c_src in range(C_src):
                 x, y = x_values[x_src, y_src], y_values[x_src, y_src]
                 if x == int(x) and y == int(y) and (x < W and x >= 0 and x < H and y >= 0):
-                    warped_image[x, y, c_src] += first_image[x_src, y_src, c_src]
-                    averaging_weight[x, y, c_src] += 1
+                    warped_image[y, x, c_src] += first_image[y_src, x_src, c_src]
+                    averaging_weight[y, x, c_src] += 1
                 else:
                     # exception will be raised if x or y are sub pixel values or out x>=W y>=H
                     x_ceil = int(np.ceil(x))
@@ -66,8 +66,8 @@ def apply_forward_warp(first_image, mapped_points, output_image_shape):
                         if pt[0] >= W or pt[0] < 0 or pt[1] >= H or pt[1] < 0:
                             continue
                         ### what in the world is splatting
-                        warped_image[pt[0], pt[1], c_src] += first_image[x_src, y_src, c_src]
-                        averaging_weight[pt[0], pt[1], c_src] += 1
+                        warped_image[pt[1], pt[0], c_src] += first_image[y_src, x_src, c_src]
+                        averaging_weight[pt[1], pt[0], c_src] += 1
     print('before loop2')
     #empty_pos
     # for x in range(W):

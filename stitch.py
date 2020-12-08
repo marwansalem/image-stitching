@@ -65,12 +65,13 @@ def stitch_image(image1_name, image2_name,first_points, second_points, show_corr
 
     mapped_points = warp_first_image_points(H, imgA)
         
-    output_image_shape = (int((imgA.shape[0]  + imgB.shape[0]) ), int((imgA.shape[1]*0 + imgB.shape[1])), imgB.shape[2] ) 
+    output_image_shape = (int((imgA.shape[0]  + imgB.shape[0]) ), int((imgA.shape[1]  + imgB.shape[1])), imgB.shape[2] ) 
     dst, mask = apply_forward_warp(imgA, mapped_points, output_image_shape)
     #dst = cv2.warpPerspective(imgA,H,(imgA.shape[1] + imgB.shape[1] ,  imgA.shape[0] + imgB.shape[0]))
 
-    print(dst.shape)
     dst[0:imgB.shape[0], 0:imgB.shape[1]] = imgB
+    print(dst.shape)
+
     cv2.imshow('output', dst)
 
 
@@ -88,39 +89,39 @@ if __name__=="__main__":
     print('====Testing some functions===')
     DEBUG = True
 
-    # points1, points2 = load_correspondences('points.txt')
+    points1, points2 = load_correspondences('img2img1.txt')
 
     # print(points1.shape)
     
-    # A = initialize_matrix_A(points1, points2)
-    # print(A.shape)
-    # H = compute_H(A)
+    A = initialize_matrix_A(points1, points2)
+    #print(A.shape)
+    H = compute_H(A)
 
-    # imgB = cv2.imread('image2.jpg')
+    imgA = cv2.imread('image2.jpg')
     # #copy = show_points_on_image(imgB,'Mapping',points2,marker_color=(0,0, 255))
     # mapped_points = image1_to_image2(H, points1)
 
 
-    # imgA = cv2.imread('image1.jpg')
-    #mapped_points = warp_first_image_points(H, imgA)
+    imgB= cv2.imread('image1.jpg')
+    mapped_points = warp_first_image_points(H, imgA)
     #show_points_on_image(copy,'Mapping', mapped_points)
 
     #cv2.waitKey(0) 
     #cv2.destroyAllWindows()
 
     ##########
-    #try:
-    #    output_image_shape = (int((imgA.shape[0] + imgB.shape[0]) ), int((imgA.shape[1] + imgB.shape[1])), imgA.shape[2] ) 
-    #    warped_image, mask = apply_forward_warp(imgA, mapped_points, output_image_shape)
-    #except Exception as e:
-    #    print(e)
-    #    print('exception')
+    try:
+        output_image_shape = (int((imgA.shape[0] + imgB.shape[0]) ), int((imgA.shape[1] + imgB.shape[1])), imgA.shape[2] ) 
+        warped_image, mask = apply_forward_warp(imgA, mapped_points, output_image_shape)
+    except Exception as e:
+        print(e)
+        print('exception')
 
     #warped_image = inverse_warp(H, warped_image, imgA, mask)
     #print(warped_image)
     #print(np.where(warped_image == 0)[0].shape)
-    #cv2.imshow('TEST warped', warped_image)
-    #cv2.imwrite('testwarped.jpg', warped_image)
+    cv2.imshow('TEST warped', warped_image)
+    cv2.imwrite('testwarpedrev.jpg', warped_image)
 
 
     cv2.waitKey(0) 
@@ -128,7 +129,7 @@ if __name__=="__main__":
     #######
     print('===Testing Complete===')
 
-    if  DEBUG or True:
+    if  DEBUG and False:
         image1_path = get_image_path("Select first image")
         image2_path = get_image_path("Select second image")
 
