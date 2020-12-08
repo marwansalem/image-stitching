@@ -62,14 +62,18 @@ def stitch_image(image1_name, image2_name,first_points, second_points, show_corr
         cv2.waitKey(0) 
         cv2.destroyAllWindows() 
 
-
-    mapped_points = warp_first_image_points(H, imgA)
-        
-    output_image_shape = (int((imgA.shape[0]  + imgB.shape[0]) ), int((imgA.shape[1]  + imgB.shape[1])), imgB.shape[2] ) 
-    dst, mask = apply_forward_warp(imgA, mapped_points, output_image_shape)
+    warped, x_min, y_min= warp_pipeline(H, imgA, imgB)
+    
     #dst = cv2.warpPerspective(imgA,H,(imgA.shape[1] + imgB.shape[1] ,  imgA.shape[0] + imgB.shape[0]))
-
-    dst[0:imgB.shape[0], 0:imgB.shape[1]] = imgB
+    start_x = 0
+    if x_min < 0 or True:
+        start_x = int(-np.floor(x_min))
+    start_y = 0
+    if y_min < 0 or True:
+        start_y = int(-np.floor(y_min))
+    dst = warped
+    dst[start_y: start_y + imgB.shape[0], start_x:start_x + imgB.shape[1]] = imgB
+    
     print(dst.shape)
 
     cv2.imshow('output', dst)
@@ -89,44 +93,47 @@ if __name__=="__main__":
     print('====Testing some functions===')
     DEBUG = True
 
-    points1, points2 = load_correspondences('img2img1.txt')
+    points1, points2 = load_correspondences('pointsperfect.txt')
 
-    # print(points1.shape)
-    
+    imgA = cv2.imread('image1.jpg')
+    imgB= cv2.imread('image2.jpg')
+
     A = initialize_matrix_A(points1, points2)
-    #print(A.shape)
     H = compute_H(A)
+    warped, x_min, y_min = warp_pipeline(H, imgA, imgB)
+    cv2.imshow('warped', warped)
+    #cv2.imwrite('warpedshift.jpg', warped)
+    start_x = 0
+    if x_min < 0:
+        start_x = int(-np.floor(x_min))
+    start_y = 0
+    if y_min < 0:
+        start_y = int(-np.floor(y_min))
+    
+    print('B shape', imgB.shape)
+    print('warped shape', warped.shape)
 
-    imgA = cv2.imread('image2.jpg')
-    # #copy = show_points_on_image(imgB,'Mapping',points2,marker_color=(0,0, 255))
-    # mapped_points = image1_to_image2(H, points1)
+    print('xstart', start_x)
+    print('xstart + W', start_x + imgB.shape[1])
+    print('ystart', start_y)
+    print('ystart + H', start_y + imgB.shape[0])
 
-
-    imgB= cv2.imread('image1.jpg')
-    mapped_points = warp_first_image_points(H, imgA)
-    #show_points_on_image(copy,'Mapping', mapped_points)
-
-    #cv2.waitKey(0) 
-    #cv2.destroyAllWindows()
-
-    ##########
-    try:
-        output_image_shape = (int((imgA.shape[0] + imgB.shape[0]) ), int((imgA.shape[1] + imgB.shape[1])), imgA.shape[2] ) 
-        warped_image, mask = apply_forward_warp(imgA, mapped_points, output_image_shape)
-    except Exception as e:
-        print(e)
-        print('exception')
+    warped[start_y: start_y + imgB.shape[0], start_x:start_x + imgB.shape[1]] = imgB
+    #warped[0: imgA.shape[0], 0:imgA.shape[1]] = imgA
+    
+    cv2.imshow('comb', warped)
+    #cv2.imwrite('combo.jpg', warped)
+    cv2.waitKey(0) 
+    cv2.destroyAllWindows()
+    #######
 
     #warped_image = inverse_warp(H, warped_image, imgA, mask)
     #print(warped_image)
     #print(np.where(warped_image == 0)[0].shape)
-    cv2.imshow('TEST warped', warped_image)
-    cv2.imwrite('testwarpedrev.jpg', warped_image)
+    #cv2.imshow('TEST warped', warped_image)
+    #cv2.imwrite('testwarpedrev.jpg', warped_image)
 
 
-    cv2.waitKey(0) 
-    cv2.destroyAllWindows()
-    #######
     print('===Testing Complete===')
 
     if  DEBUG and False:

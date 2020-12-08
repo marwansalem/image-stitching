@@ -13,7 +13,6 @@ def initialize_A_i(p, p_dash):
 def initialize_matrix_A(points_1, points_2):
     num_points = len(points_1)
     A = []
-    print(num_points)
     for i in range(num_points):
         p = points_1[i]
         p_dash = points_2[i]

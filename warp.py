@@ -79,8 +79,9 @@ def apply_forward_warp(first_image, mapped_points, output_image_shape):
                 
     #             if w !=0:
     #                 pass
-
-    warped_image =np.where(averaging_weight > 1, warped_image//averaging_weight, warped_image)
+    eps = 0.0000000001
+    # added small value to avoid integer division
+    warped_image = np.where(averaging_weight > 1, warped_image//(averaging_weight + eps), warped_image)
     warped_image = warped_image.astype(np.uint8)
     return warped_image, averaging_weight[:, :, 0]
     # apply splatting
@@ -126,3 +127,21 @@ def inverse_warp(H, warped_image, source_image, mask):
                             warped_image[x, y, c] += intensity
 
     return warped_image
+
+
+def warp_pipeline(H_matrix, first_image, second_image):
+    mapped_points = warp_first_image_points(H_matrix, first_image)
+    output_image_shape = (first_image.shape[0]+ second_image.shape[0], first_image.shape[1] + second_image.shape[1], first_image.shape[2])
+    x_vals, y_vals = mapped_points
+    x_min, y_min = np.min(x_vals), np.min(y_vals)
+
+    if x_min < 0:
+        x_vals += -x_min
+    if y_min < 0:
+        y_vals += -y_min
+
+    mapped_points = (x_vals, y_vals)
+
+    warped_image, mask = apply_forward_warp(first_image, mapped_points, output_image_shape)
+
+    return warped_image, x_min, y_min
